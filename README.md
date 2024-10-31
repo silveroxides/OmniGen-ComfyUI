@@ -6,7 +6,7 @@ in prompt text, you only need `image_1`, text will auto be `<img><|image_1|></im
 |text|image_1|image_2|image_3|out_img|
 |--|--|--|--|--|
 |`A curly-haired man in a red shirt is drinking tea.`|--|--|--|![](./doc/ComfyUI_temp_mdplu_00001_.png)|
-|`The woman in image_1 waves her hand happily in the crowd`|![](./doc/zhang.png)|--|--|![]()|
+|`The woman in image_1 waves her hand happily in the crowd`|![](./doc/zhang.png)|--|--|![](./doc/ComfyUI_temp_pphmf_00001_.png)|
 
 ## Tips
 For out of memory or time cost, you can refer to [./docs/inference.md#requiremented-resources](https://github.com/VectorSpaceLab/OmniGen/blob/main/docs/inference.md#requiremented-resources) to select a appropriate setting.
