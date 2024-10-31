@@ -9,7 +9,7 @@ in prompt text, you only need `image_1`, text will auto be `<img><|image_1|></im
 |`The woman in image_1 waves her hand happily in the crowd`|![](./doc/zhang.png)|--|--|![](./doc/ComfyUI_temp_pphmf_00001_.png)|
 
 ## Tips
-For out of memory or time cost, you can refer to [./docs/inference.md#requiremented-resources](https://github.com/VectorSpaceLab/OmniGen/blob/main/docs/inference.md#requiremented-resources) to select a appropriate setting.
+For out of memory or time cost, you can refer to [inference.md#requiremented-resources](https://github.com/VectorSpaceLab/OmniGen/blob/main/docs/inference.md#requiremented-resources) to select a appropriate setting.
 
 ```
 {"task_type":"text_to_iamge","instruction":"A white cat resting on a picnic table.","input_images":[],"output_image":"cat.png"}
