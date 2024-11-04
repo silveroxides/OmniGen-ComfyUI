@@ -24,14 +24,11 @@ class OmniGenNode:
     @classmethod
     def INPUT_TYPES(s):
         return {
-            "required":{
-                "prompt_text": ("STRING", {
-                    "multiline": True,
-                    "default": "Generate an image of a cat",
-                    "tooltip": "You only need image_1, text will auto be <img><|image_1|></img>"
+            "required": {
+                "prompt_text":("TEXT",{
+                    "tooltip":"you only need image_1, text will auto be <img><|image_1|></img>"
                 }),
-                "height": (["INT", {"default": 1024, "min": 128, "max": 2048, "step": 8}]),
-                "width": (["INT", {"default": 1024, "min": 128, "max": 2048, "step": 8}]),
+                "latent": ("LATENT",),
                 "num_inference_steps": (["INT", {"default": 50, "min": 1, "max": 100, "step": 1}]),
                 "guidance_scale": (["FLOAT", {"default": 2.5, "min": 1.0, "max": 5.0, "step": 0.1}]),
                 "img_guidance_scale": (["FLOAT", {"default": 1.6, "min": 1.0, "max": 2.0, "step": 0.1}]),
@@ -59,7 +56,7 @@ class OmniGenNode:
             "optional": {
                 "image_1": ("IMAGE",),
                 "image_2": ("IMAGE",),
-                "image_3": ("IMAGE",),
+                "image_3": ("IMAGE",)
             }
         }
     
@@ -74,9 +71,13 @@ class OmniGenNode:
             img_pil.save(f.name)
         return f.name
 
-    def gen(self,prompt_text,height,width,num_inference_steps,guidance_scale,
+    def gen(self,prompt_text,latent,num_inference_steps,guidance_scale,
             img_guidance_scale,max_input_image_size,store_in_vram,separate_cfg_infer,offload_model,
             use_input_image_size_as_output,seed,image_1=None,image_2=None,image_3=None):
+        
+        # Get dimensions from latent
+        height = latent["samples"].shape[2] * 8
+        width = latent["samples"].shape[3] * 8
         
         # Get or create pipeline based on VRAM storage setting
         if store_in_vram:
