@@ -1,5 +1,6 @@
 # OmniGen-ComfyUI
 a custom node for [OmniGen](https://github.com/VectorSpaceLab/OmniGen), you can find [workflow here](./doc/)
+btw,PromptTextNode in ［UtilNodes-ComfyUI］(https://github.com/AIFSH/UtilNodes-ComfyUI)
 
 ## EXample
 in prompt text, you only need `image_1`, text will auto be `<img><|image_1|></img>`
