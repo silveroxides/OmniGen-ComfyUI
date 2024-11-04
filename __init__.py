@@ -20,87 +20,47 @@ class OmniGenNode:
     def __init__(self):
         if not osp.exists(osp.join(omnigen_dir,"model.safetensors")):
             snapshot_download("Shitao/OmniGen-v1",local_dir=omnigen_dir)
+            
     @classmethod
     def INPUT_TYPES(s):
         return {
             "required":{
-                "prompt_text":("TEXT",{
-                    "tooltip":"you only need image_1, text will auto be <img><|image_1|></img>"
+                "prompt_text": ("STRING", {
+                    "multiline": True,
+                    "default": "Generate an image of a cat",
+                    "tooltip": "You only need image_1, text will auto be <img><|image_1|></img>"
                 }),
-                "height":("INT",{
-                    "default":1024,
-                    "min":128,
-                    "max":2048,
-                    "step":16,
-                    "display":"slider"
+                "height": (["INT", {"default": 1024, "min": 128, "max": 2048, "step": 8}]),
+                "width": (["INT", {"default": 1024, "min": 128, "max": 2048, "step": 8}]),
+                "num_inference_steps": (["INT", {"default": 50, "min": 1, "max": 100, "step": 1}]),
+                "guidance_scale": (["FLOAT", {"default": 2.5, "min": 1.0, "max": 5.0, "step": 0.1}]),
+                "img_guidance_scale": (["FLOAT", {"default": 1.6, "min": 1.0, "max": 2.0, "step": 0.1}]),
+                "max_input_image_size": (["INT", {"default": 1024, "min": 128, "max": 2048, "step": 8}]),
+                "separate_cfg_infer": ("BOOLEAN", {
+                    "default": True,
+                    "tooltip": "Whether to use separate inference process for different guidance. This will reduce the memory cost."
                 }),
-                "width":("INT",{
-                    "default":1024,
-                    "min":128,
-                    "max":2048,
-                    "step":16,
-                    "display":"slider"
+                "offload_model": ("BOOLEAN", {
+                    "default": False,
+                    "tooltip": "Offload model to CPU, which will significantly reduce the memory cost but slow down the generation speed. You can cancle separate_cfg_infer and set offload_model=True. If both separate_cfg_infer and offload_model be True, further reduce the memory, but slowest generation"
                 }),
-                "num_inference_steps":("INT",{
-                    "default":50,
-                    "min":1,
-                    "max":100,
-                    "step":1,
-                    "display":"slider"
+                "use_input_image_size_as_output": ("BOOLEAN", {
+                    "default": False,
+                    "tooltip": "Automatically adjust the output image size to be same as input image size. For editing and controlnet task, it can make sure the output image has the same size with input image leading to better performance"
                 }),
-                "guidance_scale":("FLOAT",{
-                    "default":2.5,
-                    "min":1.0,
-                    "max":5.0,
-                    "step":0.1,
-                    "round":0.01,
-                    "display":"slider"
-                }),
-                "img_guidance_scale":("FLOAT",{
-                    "default":1.6,
-                    "min":1.0,
-                    "max":2.0,
-                    "step":0.1,
-                    "round":0.01,
-                    "display":"slider"
-                }),
-                "max_input_image_size":("INT",{
-                    "default":1024,
-                    "min":128,
-                    "max":2048,
-                    "step":16,
-                    "display":"slider"
-                }),
-                "separate_cfg_infer":("BOOLEAN",{
-                    "default":True,
-                    "tooltip":"Whether to use separate inference process for different guidance. This will reduce the memory cost."
-                }),
-                "offload_model":("BOOLEAN",{
-                    "default":False,
-                    "tooltip":"Offload model to CPU, which will significantly reduce the memory cost but slow down the generation speed. You can cancle separate_cfg_infer and set offload_model=True. If both separate_cfg_infer and offload_model be True, further reduce the memory, but slowest generation"
-                }),
-                "use_input_image_size_as_output":("BOOLEAN",{
-                    "default":False,
-                    "tooltip":"Automatically adjust the output image size to be same as input image size. For editing and controlnet task, it can make sure the output image has the same size with input image leading to better performance"
-                }),
-                "seed":("INT",{
-                    "default":42
+                "seed": ("INT", {
+                    "default": 42
                 })
             },
-            "optional":{
-                "image_1":("IMAGE",),
-                "image_2":("IMAGE",),
-                "image_3":("IMAGE",),
+            "optional": {
+                "image_1": ("IMAGE",),
+                "image_2": ("IMAGE",),
+                "image_3": ("IMAGE",),
             }
         }
     
     RETURN_TYPES = ("IMAGE",)
-    #RETURN_NAMES = ("image_output_name",)
-
     FUNCTION = "gen"
-
-    #OUTPUT_NODE = False
-
     CATEGORY = "AIFSH_OmniGen"
 
     def save_input_img(self,image):
@@ -150,10 +110,8 @@ class OmniGenNode:
         )
         img = np.array(output[0]) / 255.0
         img = torch.from_numpy(img).unsqueeze(0)
-        # print(img.shape)
         shutil.rmtree(tmp_dir)
         return (img,)
-
 
 NODE_CLASS_MAPPINGS = {
     "OmniGenNode": OmniGenNode
