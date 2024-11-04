@@ -36,6 +36,10 @@ class OmniGenNode:
                 "guidance_scale": (["FLOAT", {"default": 2.5, "min": 1.0, "max": 5.0, "step": 0.1}]),
                 "img_guidance_scale": (["FLOAT", {"default": 1.6, "min": 1.0, "max": 2.0, "step": 0.1}]),
                 "max_input_image_size": (["INT", {"default": 1024, "min": 128, "max": 2048, "step": 8}]),
+                "store_in_vram": ("BOOLEAN", {
+                    "default": False,
+                    "tooltip": "Keep model in VRAM between generations. Faster but uses more VRAM."
+                }),
                 "separate_cfg_infer": ("BOOLEAN", {
                     "default": True,
                     "tooltip": "Whether to use separate inference process for different guidance. This will reduce the memory cost."
@@ -71,9 +75,17 @@ class OmniGenNode:
         return f.name
 
     def gen(self,prompt_text,height,width,num_inference_steps,guidance_scale,
-            img_guidance_scale,max_input_image_size,separate_cfg_infer,offload_model,
+            img_guidance_scale,max_input_image_size,store_in_vram,separate_cfg_infer,offload_model,
             use_input_image_size_as_output,seed,image_1=None,image_2=None,image_3=None):
-        pipe = OmniGenPipeline.from_pretrained(omnigen_dir)
+        
+        # Get or create pipeline based on VRAM storage setting
+        if store_in_vram:
+            if not hasattr(self, "omnigen_pipe"):
+                self.omnigen_pipe = OmniGenPipeline.from_pretrained(omnigen_dir)
+            pipe = self.omnigen_pipe
+        else:
+            pipe = OmniGenPipeline.from_pretrained(omnigen_dir)
+
         input_images = []
         os.makedirs(tmp_dir,exist_ok=True)
         if image_1 is not None:
@@ -111,6 +123,12 @@ class OmniGenNode:
         img = np.array(output[0]) / 255.0
         img = torch.from_numpy(img).unsqueeze(0)
         shutil.rmtree(tmp_dir)
+
+        # Clean up if not storing in VRAM
+        if not store_in_vram:
+            del pipe
+            torch.cuda.empty_cache()
+
         return (img,)
 
 NODE_CLASS_MAPPINGS = {
