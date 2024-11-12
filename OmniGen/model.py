@@ -195,11 +195,24 @@ class OmniGen(nn.Module, PeftAdapterMixin):
                                            ignore_patterns=['flax_model.msgpack', 'rust_model.ot', 'tf_model.h5'])
         config = Phi3Config.from_pretrained(model_name)
         model = cls(config)
-        if os.path.exists(os.path.join(model_name, 'model.safetensors')):
-            print("Loading safetensors")
-            ckpt = load_file(os.path.join(model_name, 'model.safetensors'))
-        else:
-            ckpt = torch.load(os.path.join(model_name, 'model.pt'), map_location='cpu')
+
+        # Try to find a model file
+        model_file = None
+        for file in os.listdir(model_name):
+            if file.endswith('.safetensors'):
+                model_file = os.path.join(model_name, file)
+                print(f"Loading safetensors model: {file}")
+                ckpt = load_file(model_file)
+                break
+            elif file.endswith('.pt') or file.endswith('.ckpt'):
+                model_file = os.path.join(model_name, file)
+                print(f"Loading checkpoint: {file}")
+                ckpt = torch.load(model_file, map_location='cpu')
+                break
+
+        if model_file is None:
+            raise RuntimeError(f"No model file (.safetensors, .pt, or .ckpt) found in {model_name}")
+
         model.load_state_dict(ckpt)
         return model
 
