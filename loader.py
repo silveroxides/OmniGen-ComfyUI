@@ -108,8 +108,7 @@ class OmniGenLoader:
             print(f"Offload Model: {offload_model}")
             
             from OmniGen import OmniGenPipeline
-            pipe = OmniGenPipeline.from_pretrained(model_path)
-            pipe.model = pipe.model.to(dtype)
+            pipe = OmniGenPipeline.from_pretrained(model_path, dtype=dtype)
 
             print(f"After loading: {get_vram_info()}")
 
